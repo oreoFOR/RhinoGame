@@ -11,12 +11,15 @@ public class Movement : MonoBehaviour
 
     [SerializeField] Transform dirIndicator;
     [SerializeField] ParticleSystem speedPs;
+    [SerializeField] ParticleSystem boostPs;
+    [SerializeField] ParticleSystem speedLines;
     //rotation
     [SerializeField] float rotSpeed;
     [SerializeField] Transform groundCheck;
     [SerializeField] LayerMask groundMask;
     [SerializeField] float groundDist;
     [SerializeField] float minTurnDist = 1;
+    [SerializeField] Animator anim;
 
     public bool grounded;
     Vector3 lastDir;
@@ -25,8 +28,10 @@ public class Movement : MonoBehaviour
 
     float horizontal;
     float vertical;
+    bool capVelocity = true;
     private void Start()
     {
+        capVelocity = true;
         rb = GetComponent<Rigidbody>();
         lastDir = Vector3.forward;
     }
@@ -43,7 +48,7 @@ public class Movement : MonoBehaviour
         xDir.y = 0;
         if(grounded)
         rb.AddForce((fDir * vertical + xDir * horizontal)*accel);
-        if(vel > topSpeed){
+        if(vel > topSpeed && grounded && capVelocity){
             rb.velocity = rb.velocity.normalized * topSpeed;
         }
         if(vel > killSpeed && !charging){
@@ -64,12 +69,13 @@ public class Movement : MonoBehaviour
     }
     private void Update()
     {
+        anim.SetFloat("speed", rb.velocity.magnitude);
         grounded = Physics.Raycast(groundCheck.position,Vector3.down,out RaycastHit hit,groundDist,groundMask);
-        if(grounded){
-            Vector3 rightVel = Vector3.Cross(rb.velocity.normalized,Vector3.down);
-            Vector3 desiredDir = Vector3.Cross(rightVel,hit.normal);
-            //lastDir = desiredDir;
-        }
+        //if(grounded){
+        //    Vector3 rightVel = Vector3.Cross(rb.velocity.normalized,Vector3.down);
+        //    Vector3 desiredDir = Vector3.Cross(rightVel,hit.normal);
+        //    //lastDir = desiredDir;
+        //}
     }
     void Charge(){
         charging = true;
@@ -79,5 +85,24 @@ public class Movement : MonoBehaviour
     void SlowDown(){
         charging = false;
         speedPs.Stop(true,ParticleSystemStopBehavior.StopEmitting);
+    }
+    public IEnumerator UncapVelocity()
+    {
+        capVelocity = false;
+        yield return new WaitForSeconds(1.5f);
+        capVelocity = true;
+    }
+    public IEnumerator Boost()
+    {
+        topSpeed += 10;
+        accel += 15;
+        //speedPs.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        boostPs.Play();
+        speedLines.Play();
+        yield return new WaitForSeconds(2);
+        boostPs.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        speedLines.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        accel -= 10;
+        topSpeed -= 10;
     }
 }

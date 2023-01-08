@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Attackable
+  - Enemy
+  - Baby
   layers:
   - Default
   - TransparentFX
@@ -14,10 +16,10 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
-  - 
-  - 
+  - cc
+  - ragdoll
+  - baby
+  - finish
   - 
   - 
   - 

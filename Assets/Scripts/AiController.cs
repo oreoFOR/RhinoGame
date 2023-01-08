@@ -28,6 +28,12 @@ public class AiController : MonoBehaviour
         health = GetComponent<Health>();
         health.onDie += DisableInput;
     }
+    public void AssignVars(Transform _player,Transform _baby,Transform _hideout)
+    {
+        player = _player;
+        baby = _baby;
+        hideout = _hideout;
+    }
     void DisableInput(){
         dead = true;
         movement.SetInput(0,0);
@@ -74,17 +80,5 @@ public class AiController : MonoBehaviour
     IEnumerator Flee(){
         yield return new WaitForSeconds(Random.Range(5,7));
         state = State.targetBaby;
-    }
-    private void OnTriggerEnter(Collider other)
-    {
-        if(other.CompareTag("Player")){
-            if(animalSize>2){
-                state = State.targetPlayer;
-            }
-            else{
-                state = State.running;
-                StartCoroutine(Flee());
-            }
-        }
     }
 }
